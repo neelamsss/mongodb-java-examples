@@ -1,6 +1,6 @@
 node{
    stage('SCM Checkout'){
-     git 'https://github.com/Laxmipriya22/mongodb-java-examples/mongo-java-driver-example'
+     git 'https://github.com/neelamsss/mongodb-java-examples/mongo-java-driver-example'
    }
    stage('Compile-Package'){
       // Get maven home path
