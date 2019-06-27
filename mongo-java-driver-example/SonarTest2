@@ -1,0 +1,41 @@
+pipeline {
+	agent any
+	environment {
+		project_path = "mongo-java-driver-example"
+	}
+	stages {
+        	stage('compile,test and package') {
+        		steps {
+				dir(project_path) {
+            				sh 'mvn clean package'
+				}
+            		}
+        	}
+		stage('build && SonarQube analysis') {
+            steps {
+                withSonarQubeEnv('sonar-mongo') {
+                    // Optionally use a Maven environment you've configured already
+                    withMaven(maven:'maven') {
+                    				dir(project_path) {
+                        sh 'mvn clean package sonar:sonar'
+                    }
+                    }
+                }
+            }
+        }
+          stage("Quality Gate") {
+            steps {
+              timeout(time: 1, unit: 'HOURS') {
+                waitForQualityGate abortPipeline: true
+              }
+            }
+          }
+        	stage('archival') {
+        		steps {
+				dir(project_path) {
+            	 			archiveArtifacts 'target/*.jar'
+            			}
+			}
+        	}
+			}
+			}
