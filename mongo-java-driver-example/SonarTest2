@@ -11,25 +11,36 @@ pipeline {
 				}
             		}
         	}
-		stage('build && SonarQube analysis') {
-            steps {
-                withSonarQubeEnv('sonar-mongo') {
-                    // Optionally use a Maven environment you've configured already
-                    withMaven(maven:'maven') {
-                    				dir(project_path) {
-                        sh 'mvn clean package sonar:sonar'
-                    }
-                    }
-                }
-            }
-        }
-          stage("Quality Gate") {
-            steps {
-              timeout(time: 1, unit: 'HOURS') {
-                waitForQualityGate abortPipeline: true
-              }
-            }
-          }
+		stage('SonarQube analysis') { 
+
+        withSonarQubeEnv('sonar-mongo') { 
+					dir(project_path) {
+
+
+          sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.3.0.603:sonar ' + 
+
+          '-f pom.xml ' +
+
+          '-Dsonar.projectKey=com.huettermann:all:master ' +
+
+          '-Dsonar.login=$SONAR_UN ' +
+
+          '-Dsonar.password=$SONAR_PW ' +
+
+          '-Dsonar.language=java ' +
+
+          '-Dsonar.sources=. ' +
+
+          '-Dsonar.tests=. ' +
+
+          '-Dsonar.test.inclusions=**/*Test*/** ' +
+
+          '-Dsonar.exclusions=**/*Test*/**'
+}
+}
+}
+
+          
         	stage('archival') {
         		steps {
 				dir(project_path) {
