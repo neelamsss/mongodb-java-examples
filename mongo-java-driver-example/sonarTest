@@ -1,0 +1,30 @@
+pipeline {
+	agent any
+	environment {
+		project_path = "mongo-java-driver-example"
+	}
+	stages {
+        	stage('compile,test and package') {
+        		steps {
+				dir(project_path) {
+            				sh 'mvn clean package'
+				}
+            		}
+        	}
+		stage("build & SonarQube analysis") {
+            agent any
+            steps {
+              withSonarQubeEnv('My SonarQube Server') {
+                sh 'mvn clean package sonar:sonar'
+              }
+            }
+          }
+        	stage('archival') {
+        		steps {
+				dir(project_path) {
+            	 			archiveArtifacts 'target/*.jar'
+            			}
+			}
+        	}
+			}
+			}
