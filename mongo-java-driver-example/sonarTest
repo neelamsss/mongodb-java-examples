@@ -11,14 +11,41 @@ pipeline {
 				}
             		}
         	}
-		stage("build & SonarQube analysis") {
-            agent any
-            steps {
-              withSonarQubeEnv('My SonarQube Server') {
-                sh 'mvn clean package sonar:sonar'
-              }
-            }
-          }
+		stage('SonarQube analysis') { 
+
+        withSonarQubeEnv('Sonar') { 
+
+          sh 'mvn org.sonarsource.scanner.maven:sonar-maven-plugin:3.3.0.603:sonar ' + 
+
+          '-f pom.xml ' +
+
+          '-Dsonar.projectKey=com.huettermann:all:master ' +
+
+          '-Dsonar.login=$SONAR_UN ' +
+
+          '-Dsonar.password=$SONAR_PW ' +
+
+          '-Dsonar.language=java ' +
+
+          '-Dsonar.sources=. ' +
+
+          '-Dsonar.tests=. ' +
+
+          '-Dsonar.test.inclusions=**/*Test*/** ' +
+
+          '-Dsonar.exclusions=**/*Test*/**'
+                 stage("SonarQube Quality Gate") { 
+
+        sleep 20
+
+        timeout(time: 1, unit: 'HOURS') { 
+
+           def qg = waitForQualityGate() 
+
+           if (qg.status != 'OK') {
+
+             error "Pipeline aborted due to quality gate failure: ${qg.status}"
+
         	stage('archival') {
         		steps {
 				dir(project_path) {
