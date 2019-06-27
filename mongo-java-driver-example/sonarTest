@@ -7,14 +7,14 @@ pipeline {
         	stage('compile,test and package') {
         		steps {
 				dir(project_path) {
-            				bat 'mvn clean package'
+            				sh 'mvn clean package'
 				}
             		}
         	}
 		stage("build & SonarQube analysis") {
           node {
               withSonarQubeEnv('My SonarQube Server') {
-                 bat 'mvn clean package sonar:sonar'
+                 sh 'mvn clean package sonar:sonar'
               }
           }
       }
